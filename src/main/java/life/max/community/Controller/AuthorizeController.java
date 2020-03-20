@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.UUID;
 
 @Controller
 public class AuthorizeController {
@@ -47,23 +46,18 @@ public class AuthorizeController {
         if (githubUser != null) {
             //获取用户信息
             User user = new User();
-<<<<<<< HEAD
-=======
             //生成token，放到用户对象中
->>>>>>> c8110d0cb9e6db0bae00fc7633505053e6dda8fc
             user.setToken(accessToken);
             user.setName(githubUser.getName());
             user.setAccount_id(String.valueOf(githubUser.getId()));
-            user.setGmtCreate(System.currentTimeMillis());
-            user.setGmtModified(user.getGmtCreate());
+            user.setGmt_Create(System.currentTimeMillis());
+            user.setGmt_Modify(user.getGmt_Create());
+            user.setAvatar_url(githubUser.getAvatar_url());
             userMapper.insert(user);
-<<<<<<< HEAD
             response.addCookie(new Cookie("token",accessToken));
-=======
             //把token放到cookie里面
             response.addCookie(new Cookie("token", accessToken));
             //登陆成功，写cookie和session
->>>>>>> c8110d0cb9e6db0bae00fc7633505053e6dda8fc
             return "redirect:/";
         } else {
             //登陆失败，重新登陆
