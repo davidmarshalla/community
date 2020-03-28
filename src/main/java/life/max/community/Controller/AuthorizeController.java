@@ -5,6 +5,7 @@ import life.max.community.dto.AccessTokenDTO;
 import life.max.community.dto.GithubUser;
 import life.max.community.mapper.UserMapper;
 import life.max.community.model.User;
+import life.max.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -27,8 +28,9 @@ public class AuthorizeController {
     @Value("${github.redirect_uri}")
     private String redirectURI;
 
+
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
@@ -50,12 +52,8 @@ public class AuthorizeController {
             user.setToken(accessToken);
             user.setName(githubUser.getName());
             user.setAccount_id(String.valueOf(githubUser.getId()));
-            user.setGmt_Create(System.currentTimeMillis());
-            user.setGmt_Modify(user.getGmt_Create());
             user.setAvatar_url(githubUser.getAvatar_url());
-            userMapper.insert(user);
-            response.addCookie(new Cookie("token",accessToken));
-            //把token放到cookie里面
+            userService.createOrUpdate(user);
             response.addCookie(new Cookie("token", accessToken));
             //登陆成功，写cookie和session
             return "redirect:/";
@@ -65,4 +63,15 @@ public class AuthorizeController {
         }
 
     }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response){
+        request.getSession().removeAttribute("user");
+        Cookie cookie = new Cookie("token", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return "redirect:/";
+    }
+
+
 }
