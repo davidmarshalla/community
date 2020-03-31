@@ -51,8 +51,8 @@ public class AuthorizeController {
             //生成token，放到用户对象中
             user.setToken(accessToken);
             user.setName(githubUser.getName());
-            user.setAccount_id(String.valueOf(githubUser.getId()));
-            user.setAvatar_url(githubUser.getAvatar_url());
+            user.setAccountId(String.valueOf(githubUser.getId()));
+            user.setAvatarUrl(githubUser.getAvatarUrl());
             userService.createOrUpdate(user);
             response.addCookie(new Cookie("token", accessToken));
             //登陆成功，写cookie和session

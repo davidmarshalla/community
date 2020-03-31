@@ -2,8 +2,11 @@ package life.max.community.service;
 
 import life.max.community.mapper.UserMapper;
 import life.max.community.model.User;
+import life.max.community.model.UserExample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -11,19 +14,26 @@ public class UserService {
     private UserMapper userMapper;
 
     public void createOrUpdate(User user) {
-        User dbUser = userMapper.findByAccountId(user.getAccount_id());
-        if(dbUser == null){
+        UserExample userExample = new UserExample();
+        userExample.createCriteria().andAccountIdEqualTo(user.getAccountId());
+        List<User> users = userMapper.selectByExample(userExample);
+        if (users.size() == 0) {
             //插入
-            user.setGmt_Create(System.currentTimeMillis());
-            user.setGmt_Modify(user.getGmt_Create());
+            user.setGmtCreate(System.currentTimeMillis());
+            user.setGmtModify(user.getGmtCreate());
             userMapper.insert(user);
-        }else {
+        } else {
             //更新
-            dbUser.setGmt_Modify(System.currentTimeMillis());
-            dbUser.setAvatar_url(user.getAvatar_url());
-            dbUser.setName(user.getName());
-            dbUser.setToken(user.getToken());
-            userMapper.update(dbUser);
+            User dbUser = users.get(0);
+            User updateUser = new User();
+            updateUser.setGmtModify(System.currentTimeMillis());
+            updateUser.setAvatarUrl(user.getAvatarUrl());
+            updateUser.setName(user.getName());
+            updateUser.setToken(user.getToken());
+            UserExample example = new UserExample();
+            example.createCriteria().andIdEqualTo(dbUser.getId());
+            userMapper.updateByExampleSelective(updateUser, example);
+
         }
     }
 }
