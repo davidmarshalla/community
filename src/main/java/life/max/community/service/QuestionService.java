@@ -2,6 +2,8 @@ package life.max.community.service;
 
 import life.max.community.dto.PaginationDto;
 import life.max.community.dto.QuestionDto;
+import life.max.community.exception.CustomizeErrorCode;
+import life.max.community.exception.CustomizeException;
 import life.max.community.mapper.QuestionMapper;
 import life.max.community.mapper.UserMapper;
 import life.max.community.model.Question;
@@ -88,6 +90,9 @@ public class QuestionService {
 
     public QuestionDto getById(Integer id) {
         Question question = questionMapper.selectByPrimaryKey(id);
+        if (question == null) {
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+        }
         QuestionDto questionDto = new QuestionDto();
         BeanUtils.copyProperties(question, questionDto);
         User user = userMapper.selectByPrimaryKey(question.getCreator());
@@ -110,7 +115,10 @@ public class QuestionService {
             updateQuestion.setTag(question.getTag());
             QuestionExample example = new QuestionExample();
             example.createCriteria().andIdEqualTo(question.getId());
-            questionMapper.updateByExampleSelective(updateQuestion, example);
+            int updated = questionMapper.updateByExampleSelective(updateQuestion, example);
+            if (updated != 1) {
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
         }
     }
 }
